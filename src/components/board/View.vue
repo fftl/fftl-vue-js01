@@ -46,9 +46,11 @@ export default {
             ,regdate:''
 			,view:''
             ,content:''
+            ,boardId:this.$route.query.boardId
 		}
 	}
 	,mounted() {
+        console.log(this.$route)
 		this.fnGetView();
 	}
 	,methods:{
@@ -68,12 +70,12 @@ export default {
 		}
 		,fnList(){
 			delete this.body.num;
-			this.$router.push({path:'./list',query:this.body});
+			this.$router.push({path:'./list', query : this.body});
 		}
         ,fnMod() {
-            console.log(this.body)
+            console.log(this.boardId)
             console.log("------------------------- View")
-			this.$router.push({path:'./write', query:{body:this.body}}); //등록화면으로 이동하면서 파라미터를 넘겨준다.
+			this.$router.push({path:'./write', query : { boardId : this.boardId }}); //등록화면으로 이동하면서 파라미터를 넘겨준다.
 		}
     }
 }

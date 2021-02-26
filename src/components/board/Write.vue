@@ -27,7 +27,9 @@
 
 		<div class="btnWrap">
 			<a href="javascript:;" @click="fnList" class="btn">목록</a>
-			<a href="javascript:;" @click="fnAddProc" class="btnAdd btn">등록</a>
+			<a v-if="!boardId" href="javascript:;" @click="fnAddProc" class="btnAdd btn">등록</a>
+			<a v-else href="javascript:;" @click="fnModProc" class="btnAdd btn">수정</a>
+            <a v-if="boardId" href="javascript:;" @click="fnDelProc" class="btnAdd btn">삭제</a>
 		</div>	
 	</div>
 </template>
@@ -41,22 +43,18 @@ let date = today.getDate();  // 날짜
 let regdate = year + "-" + month + "-" + date;
 
 export default {
-
-    
 	data() { //변수 생성
 		return{
-            // body:this.$router.query.body
-			title:''
-			,subject:''
-			,cont:''
+            boardId :this.$route.query.boardId
+			,title:''
+			,writer:''
+			,content:''
 			,id:'admin'
 			,form:'' //form 전송 데이터
-            // ,num:this.body.id
 		}
 	}
     ,mounted(){
-        console.log(this.$router.query.body)
-            if(this.num){
+            if(this.boardId){
                 console.log("fnGetView run!!")
                 this.fnGetView();
             }
@@ -67,11 +65,11 @@ export default {
 			
 		}
 		,fnGetView() {
-			this.$axios.get('http://localhost:3000/board/'+this.body.id,{params:this.body})
+			this.$http.get('http://localhost:3000/board/'+this.boardId, {params:this.boardId})
 			.then((res)=>{
-				this.view = res.data.view[0];
-				this.subject = this.view.subject;
-				this.cont = this.view.cont;
+				this.title = res.data.title;
+				this.writer = res.data.writer;
+				this.content = res.data.content;
 			})
 			.catch((err)=>{
 				console.log(err);
@@ -106,6 +104,52 @@ export default {
 			})
 			
 		}
+        ,fnModProc() {
+			if(!this.title) {
+				alert("제목을 입력해 주세요");
+				this.$refs.title.focus(); //방식으로 선택자를 찾는다.
+				return;
+			}
+
+			this.form = {
+				title:this.title
+				,writer:this.writer
+				,content:this.content
+				,regdate:regdate
+			} 
+			
+			this.$http.put('http://localhost:3000/board/'+this.boardId, this.form)
+			.then((res)=>{
+                console.log(res)
+				if(res.status == 200) {
+					alert('수정되었습니다.');
+					this.fnList();
+				} else {
+					alert("실행중 실패했습니다.\n다시 이용해 주세요");
+				}
+			})
+			.catch((err)=>{
+				console.log(err);
+			})
+		}
+        ,fnDelProc(){
+            if(confirm("정말 삭제하시겠습니까?") == true){
+                this.$http.delete('http://localhost:3000/board/'+this.boardId)
+                .then((res)=>{
+                    if(res.status == 200) {
+                        alert('삭제되었습니다.');
+                        this.fnList();
+                    } else {
+                        alert("실행중 실패했습니다.\n다시 이용해 주세요");
+                    }
+                })
+                .catch((err)=>{
+                    console.log(err);
+                })
+            } else {
+                return;
+            }
+        }
 	}	
 }
 </script>
